@@ -75,8 +75,8 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ### Build & Run Container
 
 ```sh
-docker build -t backend-security-api .
-docker run -p 8000:8000 backend-security-api
+docker build -t CYBERSHIELDx .
+docker run -p 8000:8000 CYBERSHIELDx
 ```
 
 ## ☁️ Kubernetes Deployment
