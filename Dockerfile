@@ -19,4 +19,4 @@ COPY . .
 EXPOSE 8000
 
 # Command to run the application with Gunicorn and Uvicorn
-CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
