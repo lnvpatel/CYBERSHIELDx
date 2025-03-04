@@ -26,8 +26,8 @@
 ### 1️⃣ Clone Repository
 
 ```sh
-git clone https://github.com/your-repo/backend-security-api.git
-cd backend-security-api
+https://github.com/lnvpatel/CYBERSHIELDx.git
+cd CYBERSHIELDx
 ```
 
 ### 2️⃣ Install Dependencies
