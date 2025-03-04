@@ -1,0 +1,42 @@
+import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.db import get_db
+from app.models import User
+
+def test_register_user(reset_db, client):
+    response = client.post("/auth/register", json={
+        "email": "test@example.com",
+        "username": "testuser",
+        "password": "StrongP@ss1"
+    })
+    assert response.status_code == 201
+    response_data = response.json()
+    
+    assert response_data["message"] == "User registered successfully. Please verify your email."
+    assert response_data["username"] == "testuser"
+
+
+@pytest.mark.asyncio
+async def test_login_user(reset_db, client):
+    # First, register the user
+    response = client.post("/auth/register", json={
+        "email": "test@example.com",
+        "username": "testuser",
+        "password": "StrongP@ss1"
+    })
+    assert response.status_code == 201
+
+    # Retrieve DB session asynchronously
+    async for db in get_db():  
+        user = await db.get(User, 1)  # Get the user from the database
+        user.is_verified = True  # Mark user as verified
+        await db.commit()  # Commit the changes
+        break  # Exit the async generator
+
+    # Attempt login
+    response = client.post("/auth/login", json={
+        "username": "testuser",
+        "password": "StrongP@ss1"
+    })
+    
+    assert response.status_code == 200  # Expect login to succeed

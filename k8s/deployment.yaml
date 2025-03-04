@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-security-api
+  labels:
+    app: backend-security-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend-security-api
+  template:
+    metadata:
+      labels:
+        app: backend-security-api
+    spec:
+      containers:
+        - name: backend-security-api
+          image: your-dockerhub-username/backend-security-api:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: backend-config
+            - secretRef:
+                name: backend-secrets
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      restartPolicy: Always
