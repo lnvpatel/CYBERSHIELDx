@@ -28,14 +28,6 @@ services:
     region: ohio # IMPORTANT: Must be the same region as your database service.
     plan: starter # You can choose 'free', 'starter', 'standard', etc.
 
-    # --- Database Linkage for the Web Service ---
-    # THIS IS THE CRITICAL SECTION FOR INDENTATION.
-    # 'databases' must be at the same level as 'type', 'name', 'env', 'region', 'plan',
-    # 'buildCommand', 'startCommand', and 'envVars'.
-    databases:
-      - name: cybershieldx-db # This name MUST match the 'name' given to your database service above.
-                               # Render will now inject DATABASE_URL for you.
-
     # --- Build and Start Commands ---
     buildCommand: "./build.sh" # Replace with your actual build script or 'pip install -r requirements.txt'
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT" # Adjust 'app.main:app' to your actual FastAPI app entrypoint
@@ -109,9 +101,15 @@ services:
         value: "N/A" # Consider setting to null for open registration
 
       # ========================
-      # DATABASE CONFIGURATION (Non-URL specific)
-      # DATABASE_URL is automatically injected by Render due to the 'databases' link
+      # DATABASE CONFIGURATION (URL injected by Render)
+      # This is the correct way to link to a Render-managed database
+      # Render will set DATABASE_URL using the connection string from 'cybershieldx-db'
       # ========================
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cybershieldx-db # This name MUST match the 'name' given to your database service above.
+          property: connectionString
+
       - key: DB_POOL_SIZE
         value: "10"
       - key: DB_POOL_TIMEOUT
