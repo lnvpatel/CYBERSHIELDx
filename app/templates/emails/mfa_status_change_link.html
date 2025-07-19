@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Factor Authentication Status Change</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e0e0e0;
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eeeeee;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: #007BFF;
+            font-size: 28px;
+            margin: 0;
+        }
+        .content {
+            margin-bottom: 20px;
+        }
+        .content p {
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #555555;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: #007BFF;
+            color: #ffffff !important; /* Important to override client styles */
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #eeeeee;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888888;
+        }
+        .footer p {
+            margin: 5px 0;
+        }
+        .warning {
+            color: #DC3545;
+            font-weight: bold;
+        }
+        .link-text {
+            word-break: break-all;
+            font-size: 14px;
+            color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>CybershieldX</h1>
+        </div>
+        <div class="content">
+            <p>Hello {% if first_name %}{{ first_name }}{% else %}User{% endif %},</p>
+
+            {% if is_enable_confirm_link %}
+                <p>You recently initiated a request to **enable Multi-Factor Authentication (MFA)** for your CybershieldX account. To complete this process and secure your account, please click the button below:</p>
+                <div class="button-container">
+                    <a href="{{ confirmation_url }}" class="button">Confirm MFA Enablement</a>
+                </div>
+                <p>If you did not initiate this request, please ignore this email. Your MFA status will remain unchanged.</p>
+            {% else %}
+                <p>You recently initiated a request to **disable Multi-Factor Authentication (MFA)** for your CybershieldX account. To confirm this action, please click the button below:</p>
+                <div class="button-container">
+                    <a href="{{ confirmation_url }}" class="button">Confirm MFA Disablement</a>
+                </div>
+                <p>If you did not initiate this request, please ignore this email. Your MFA status will remain unchanged, and your account will remain protected by MFA.</p>
+            {% endif %}
+
+            <p class="warning">This link is valid for a limited time (usually 15 minutes). For security reasons, do not share this link with anyone.</p>
+
+            <p>If the button above does not work, you can copy and paste the following link into your web browser:</p>
+            <p class="link-text"><a href="{{ confirmation_url }}">{{ confirmation_url }}</a></p>
+
+            <p>Thank you for helping us keep your account secure.</p>
+            <p>The CybershieldX Team</p>
+        </div>
+        <div class="footer">
+            <p>&copy; {{ current_year }} CybershieldX. All rights reserved.</p>
+            <p>This is an automated email, please do not reply.</p>
+        </div>
+    </div>
+</body>
+</html>
