@@ -1,0 +1,178 @@
+# render.yaml
+# This file defines your infrastructure on Render.com.
+# https://render.com/docs/render-yaml
+
+services:
+  # ========================
+  # Backend Web Service
+  # ========================
+  - type: web
+    name: cybershieldx-backend
+    env: python
+    region: ohio # Choose a region closest to your users or other services
+    plan: starter # You can choose 'free', 'starter', 'standard', etc.
+    buildCommand: "./build.sh" # Or whatever your build script is (e.g., 'pip install -r requirements.txt')
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT" # Adjust 'app.main:app' to your actual FastAPI app entrypoint
+    # connect to your PostgreSQL database
+    # Render will automatically inject the DATABASE_URL environment variable for 'cybershieldx-db'
+    databases:
+      - name: cybershieldx-db # This must match the 'name' of your PostgreSQL service below
+
+    envVars:
+      # ========================
+      # APP CORE CONFIGURATION
+      # ========================
+      - key: APP_NAME
+        value: "CYBERSHIELDx API"
+      - key: VERSION
+        value: "1.0.1"
+      - key: ENVIRONMENT
+        value: "PROD" # CRITICAL: Set to PROD for production environment
+      - key: BACKEND_URL
+        value: "https://cybershieldx-backend.onrender.com" # !!! IMPORTANT: Update with your actual Render URL
+      - key: FRONTEND_URL
+        value: "https://your-frontend-service.onrender.com" # !!! IMPORTANT: Update with your actual frontend URL
+      - key: DEBUG
+        value: "false" # Must be false in production
+
+      # ========================
+      # SECURITY CONFIGURATION
+      # ========================
+      - key: SECRET_KEY
+        sync: false # Set this value manually in Render dashboard for security (or use a Render Secret File)
+      - key: ALGORITHM
+        value: "HS256"
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "15"
+      - key: REFRESH_TOKEN_EXPIRE_DAYS
+        value: "7"
+      - key: REMEMBER_ME_REFRESH_TOKEN_EXPIRE_DAYS
+        value: "15"
+      - key: PASSWORD_RESET_TIMEOUT
+        value: "600"
+      - key: PASSWORD_HISTORY_COUNT
+        value: "3"
+      - key: MIN_PASSWORD_LENGTH
+        value: "8"
+      - key: PASSWORD_HISTORY_CHECK_COUNT
+        value: "5"
+      - key: ACCOUNT_LOCKOUT_ATTEMPTS
+        value: "5"
+      - key: ACCOUNT_LOCKOUT_DURATION_MINUTES
+        value: "30"
+      - key: REQUIRE_EMAIL_VERIFICATION
+        value: "true"
+      - key: API_RATE_LIMIT_PER_MINUTE
+        value: "100"
+      - key: OTP_LENGTH
+        value: "6"
+      - key: OTP_EXPIRATION_MINUTES
+        value: "5"
+      - key: TOTP_PERIOD
+        value: "30"
+      - key: TOTP_DIGITS
+        value: "6"
+      - key: MFA_OTP_EXPIRE_MINUTES
+        value: "5"
+      - key: MFA_OTP_LENGTH
+        value: "6"
+      - key: MFA_CHALLENGE_TOKEN_EXPIRE_MINUTES
+        value: "5"
+      - key: MFA_EMAIL_TOKEN_EXPIRE_MINUTES
+        value: "15"
+      - key: ADMIN_REGISTRATION_CODE
+        value: "73104422" # Consider setting to null or a different value for production
+      - key: USER_REGISTRATION_CODE
+        value: "N/A" # Consider setting to null for open registration
+
+      # ========================
+      # DATABASE CONFIGURATION
+      # (DATABASE_URL is injected by Render when linking to a Render PostgreSQL service)
+      # ========================
+      - key: DB_POOL_SIZE
+        value: "10"
+      - key: DB_POOL_TIMEOUT
+        value: "30"
+      - key: DB_POOL_RECYCLE
+        value: "3600"
+      # DB_SSL_MODE will be appended by your config.py if not present in DATABASE_URL
+      # Render's internal connections are secure, but you can explicitly set verify-full if needed.
+      # - key: DB_SSL_MODE
+      #   value: "verify-full" # Render typically handles secure internal connections
+
+      # ========================
+      # EMAIL SERVICE CONFIG
+      # ========================
+      - key: MAIL_SERVER
+        value: "smtp.gmail.com"
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false # Set this value manually in Render dashboard
+      - key: MAIL_PASSWORD
+        sync: false # Set this value manually in Render dashboard
+      - key: MAIL_FROM
+        value: "cybershieldv@gmail.com"
+      - key: MAIL_TLS
+        value: "true"
+      - key: MAIL_SSL
+        value: "false"
+      - key: USE_CREDENTIALS
+        value: "true"
+      - key: VALIDATE_CERTS
+        value: "true"
+      - key: EMAIL_VERIFICATION_TIMEOUT
+        value: "60"
+
+      # ========================
+      # LOGGING CONFIGURATION
+      # ========================
+      - key: LOG_LEVEL
+        value: "INFO"
+      - key: LOG_FILE_PATH
+        value: "" # Set to empty string or null for production stdout/stderr logging
+      - key: LOG_FORMAT
+        value: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+      - key: ENABLE_ADMIN_LOGS
+        value: "true"
+      - key: CLEANUP_INTERVAL_SECONDS
+        value: "3600"
+      - key: CLEANUP_RETENTION_HOURS
+        value: "24"
+
+
+      # ========================
+      # FEATURE FLAGS
+      # ========================
+      - key: REQUIRE_ADMIN_APPROVAL
+        value: "false"
+      - key: ENABLE_RATE_LIMITING
+        value: "true"
+
+      # ========================
+      # CORS ORIGINS
+      # ========================
+      # IMPORTANT: This must be a JSON array string for pydantic to parse it correctly
+      - key: CORS_ORIGINS
+        value: '["https://your-frontend-service.onrender.com", "http://localhost:3000"]' # !!! IMPORTANT: Update with your actual frontend URL. Add localhost for testing if needed.
+
+      # ========================
+      # SECURITY TOOLS API KEYS
+      # ========================
+      - key: VIRUSTOTAL_API_KEY
+        sync: false # Set this value manually in Render dashboard
+      - key: ABUSEIPDB_API_KEY
+        sync: false # Set this value manually in Render dashboard
+      - key: IPAPI_API_KEY
+        sync: false # Set this value manually in Render dashboard
+
+  # ========================
+  # PostgreSQL Database Service
+  # ========================
+  - type: pserv # 'pserv' stands for PostgreSQL Service
+    name: cybershield # This name is referenced in the 'databases' section of the web service
+    region: ohio # Must be the same region as your web service
+    plan: free # or 'starter', 'standard', etc.
+    # ipAllowList: [] # Optional: Restrict access to the database (e.g., only from your web service)
+    # The database will automatically have an admin user and password generated.
+    # Render will automatically inject DATABASE_URL into services linked to this database.
