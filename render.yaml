@@ -2,26 +2,45 @@
 # This file defines your infrastructure on Render.com.
 # https://render.com/docs/render-yaml
 
+# ========================
+# 1. PostgreSQL Database Service Definition
+# This section defines the database that Render will provision and manage.
+# ========================
+databases:
+  - name: cybershieldx-db # This is the unique name for this database service within Render blueprint.
+                          # Your web service will link to this name.
+    type: postgres
+    region: ohio # IMPORTANT: Must be the same region as your web service.
+    plan: free   # Or 'starter', 'standard', etc. based on your needs.
+    databaseName: cybershieldx # The actual name of the database within PostgreSQL.
+    user: cybershieldx_user    # The default PostgreSQL username for your app.
+    # Render will automatically generate a strong password for this user
+    # and expose the DATABASE_URL to linked services.
+
+
+# ========================
+# 2. Backend Web Service Definition
+# This section defines your FastAPI application.
+# ========================
 services:
-  # ========================
-  # Backend Web Service
-  # ========================
   - type: web
     name: cybershieldx-backend
     env: python
-    region: ohio # Choose a region closest to your users or other services
+    region: ohio # IMPORTANT: Must be the same region as your database service.
     plan: starter # You can choose 'free', 'starter', 'standard', etc.
 
-    # --- THIS IS THE CORRECT PLACEMENT FOR 'databases' ---
-    # Connect to your PostgreSQL database named 'cybershieldx-db'
-    # Render will automatically inject the DATABASE_URL environment variable for 'cybershieldx-db'
+    # --- Database Linkage for the Web Service ---
+    # This tells Render to connect this web service to 'cybershieldx-db'
+    # and automatically inject the DATABASE_URL environment variable.
     databases:
-      - name: cybershieldx # This must match the 'name' of your PostgreSQL service below
-    # -----------------------------------------------------
+      - name: cybershieldx-db # This name MUST match the 'name' given to your database service above.
+                               # Render will now inject DATABASE_URL for you.
 
-    buildCommand: "pip install -r requirements.txt"
+    # --- Build and Start Commands ---
+    buildCommand: "./build.sh" # Replace with your actual build script or 'pip install -r requirements.txt'
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT" # Adjust 'app.main:app' to your actual FastAPI app entrypoint
 
+    # --- Environment Variables for the Web Service ---
     envVars:
       # ========================
       # APP CORE CONFIGURATION
@@ -33,9 +52,9 @@ services:
       - key: ENVIRONMENT
         value: "PROD" # CRITICAL: Set to PROD for production environment
       - key: BACKEND_URL
-        value: "https://cybershieldx-backend.onrender.com" # !!! IMPORTANT: Update with your actual Render URL
+        value: "https://cybershieldx-backend.onrender.com" # !!! IMPORTANT: Update with your actual Render URL AFTER deployment
       - key: FRONTEND_URL
-        value: "https://your-frontend-service.onrender.com" # !!! IMPORTANT: Update with your actual frontend URL
+        value: "https://your-frontend-service.onrender.com" # !!! IMPORTANT: Update with your actual frontend URL AFTER deployment
       - key: DEBUG
         value: "false" # Must be false in production
 
@@ -43,7 +62,7 @@ services:
       # SECURITY CONFIGURATION
       # ========================
       - key: SECRET_KEY
-        sync: false # Set this value manually in Render dashboard for security (or use a Render Secret File)
+        sync: false # Set this value manually in Render dashboard for security
       - key: ALGORITHM
         value: "HS256"
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
@@ -85,13 +104,13 @@ services:
       - key: MFA_EMAIL_TOKEN_EXPIRE_MINUTES
         value: "15"
       - key: ADMIN_REGISTRATION_CODE
-        value: "73104422" # Consider setting to null or a different value for production
+        value: "73104422" # Consider setting to null or a different value for production if not needed
       - key: USER_REGISTRATION_CODE
         value: "N/A" # Consider setting to null for open registration
 
       # ========================
-      # DATABASE CONFIGURATION
-      # (DATABASE_URL is injected by Render when linking to a Render PostgreSQL service)
+      # DATABASE CONFIGURATION (Non-URL specific)
+      # DATABASE_URL is automatically injected by Render due to the 'databases' link
       # ========================
       - key: DB_POOL_SIZE
         value: "10"
@@ -165,12 +184,3 @@ services:
         sync: false # Set this value manually in Render dashboard
       - key: IPAPI_API_KEY
         sync: false # Set this value manually in Render dashboard
-
-  # ========================
-  # PostgreSQL Database Service
-  # ========================
-  - type: pserv # 'pserv' stands for PostgreSQL Service
-    name: cybershieldx # This name is referenced in the 'databases' section of the web service
-    region: ohio # Must be the same region as your web service
-    plan: free # or 'starter', 'standard', etc.
-    # ipAllowList: [] # Optional: Restrict access to the database (e.g., only from your web service)
