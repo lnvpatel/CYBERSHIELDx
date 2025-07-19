@@ -8,6 +8,7 @@
 # ========================
 databases:
   - name: cybershieldx-db # This is the unique name for this database service within Render blueprint.
+                          # Your web service will link to this name.
     region: ohio # IMPORTANT: Must be the same region as your web service.
     plan: free   # Or 'starter', 'standard', etc. based on your needs.
     databaseName: cybershieldx # The actual name of the database within PostgreSQL.
@@ -28,8 +29,9 @@ services:
     plan: starter # You can choose 'free', 'starter', 'standard', etc.
 
     # --- Database Linkage for the Web Service ---
-    # This tells Render to connect this web service to 'cybershieldx-db'
-    # and automatically inject the DATABASE_URL environment variable.
+    # THIS IS THE CRITICAL SECTION FOR INDENTATION.
+    # 'databases' must be at the same level as 'type', 'name', 'env', 'region', 'plan',
+    # 'buildCommand', 'startCommand', and 'envVars'.
     databases:
       - name: cybershieldx-db # This name MUST match the 'name' given to your database service above.
                                # Render will now inject DATABASE_URL for you.
