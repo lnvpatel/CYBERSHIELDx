@@ -11,12 +11,16 @@ services:
     env: python
     region: ohio # Choose a region closest to your users or other services
     plan: starter # You can choose 'free', 'starter', 'standard', etc.
-    buildCommand: "pip install -r requirements.txt" # Or whatever your build script is (e.g., 'pip install -r requirements.txt')
-    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port 8000" # Adjust 'app.main:app' to your actual FastAPI app entrypoint
-    # connect to your PostgreSQL database
+
+    # --- THIS IS THE CORRECT PLACEMENT FOR 'databases' ---
+    # Connect to your PostgreSQL database named 'cybershieldx-db'
     # Render will automatically inject the DATABASE_URL environment variable for 'cybershieldx-db'
     databases:
       - name: cybershield # This must match the 'name' of your PostgreSQL service below
+    # -----------------------------------------------------
+
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT" # Adjust 'app.main:app' to your actual FastAPI app entrypoint
 
     envVars:
       # ========================
@@ -95,10 +99,6 @@ services:
         value: "30"
       - key: DB_POOL_RECYCLE
         value: "3600"
-      # DB_SSL_MODE will be appended by your config.py if not present in DATABASE_URL
-      # Render's internal connections are secure, but you can explicitly set verify-full if needed.
-      # - key: DB_SSL_MODE
-      #   value: "verify-full" # Render typically handles secure internal connections
 
       # ========================
       # EMAIL SERVICE CONFIG
@@ -174,5 +174,3 @@ services:
     region: ohio # Must be the same region as your web service
     plan: free # or 'starter', 'standard', etc.
     # ipAllowList: [] # Optional: Restrict access to the database (e.g., only from your web service)
-    # The database will automatically have an admin user and password generated.
-    # Render will automatically inject DATABASE_URL into services linked to this database.
