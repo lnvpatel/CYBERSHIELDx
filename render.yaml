@@ -16,7 +16,7 @@ services:
     # Connect to your PostgreSQL database named 'cybershieldx-db'
     # Render will automatically inject the DATABASE_URL environment variable for 'cybershieldx-db'
     databases:
-      - name: cybershield # This must match the 'name' of your PostgreSQL service below
+      - name: cybershieldx # This must match the 'name' of your PostgreSQL service below
     # -----------------------------------------------------
 
     buildCommand: "pip install -r requirements.txt"
@@ -170,7 +170,7 @@ services:
   # PostgreSQL Database Service
   # ========================
   - type: pserv # 'pserv' stands for PostgreSQL Service
-    name: cybershield # This name is referenced in the 'databases' section of the web service
+    name: cybershieldx # This name is referenced in the 'databases' section of the web service
     region: ohio # Must be the same region as your web service
     plan: free # or 'starter', 'standard', etc.
     # ipAllowList: [] # Optional: Restrict access to the database (e.g., only from your web service)
